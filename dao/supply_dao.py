@@ -45,7 +45,3 @@ class SupplyDAO:
                 storekeeper_id=row[4]
             ) for row in rows
         ]
-
-class MockSupplyDAO:
-    def find_by_id(self, id):
-        return {"id": id}

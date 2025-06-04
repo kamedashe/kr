@@ -78,7 +78,3 @@ class SupplyRecordDAO:
         with self.conn:
             cur = self.conn.execute("DELETE FROM supply_records WHERE id = ?", (record_id,))
         return cur.rowcount > 0
-
-class MockSupplyRecordDAO:
-    def find_by_supply(self, supply_id):
-        return [{"rec": 1}]
