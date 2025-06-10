@@ -1,5 +1,5 @@
 
-from tkinter import ttk
+from tkinter import ttk, StringVar
 
 
 class OrdersTab(ttk.Frame):
@@ -7,6 +7,13 @@ class OrdersTab(ttk.Frame):
 
     def __init__(self, parent):
         super().__init__(parent)
+
+        self.details_var = StringVar()
+
+        form = ttk.Frame(self)
+        form.pack(fill="x", pady=5)
+        ttk.Label(form, text="Details:").pack(side="left", padx=5)
+        ttk.Entry(form, textvariable=self.details_var).pack(side="left", fill="x", expand=True, padx=5)
 
         btn_frame = ttk.Frame(self)
         btn_frame.pack(fill="x", pady=5)
