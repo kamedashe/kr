@@ -34,24 +34,38 @@ class ComponentDAO:
             )
         return cur.lastrowid
 
-    def update(self, component: dict) -> bool:
-        """Update component by ID using dict fields."""
+    def update(self, component: int | dict, values: dict | None = None) -> bool:
+        """Update component by ID using dict fields.
+
+        Can be called either with a full component ``dict`` containing an ``id``
+        or with a component ``id`` and a ``values`` dictionary.
+        """
+        if isinstance(component, int):
+            component_id = component
+            if values is None:
+                raise ValueError("values must be provided when updating by id")
+            data = values
+        else:
+            data = component
+            component_id = data.get("id")
+
         with self.conn:
             cur = self.conn.execute(
                 """UPDATE components
                        SET name = ?, unit = ?, quantity_in_stock = ?
                      WHERE id = ?""",
                 (
-                    component.get("name"),
-                    component.get("unit"),
-                    component.get("quantity_in_stock", 0),
-                    component.get("id"),
+                    data.get("name"),
+                    data.get("unit"),
+                    data.get("quantity_in_stock", 0),
+                    component_id,
                 ),
             )
         return cur.rowcount > 0
 
-    def delete(self, component_id: int) -> bool:
-        """Delete component by ID."""
+    def delete(self, component: int | dict) -> bool:
+        """Delete component by ID or component dict."""
+        component_id = component if isinstance(component, int) else component.get("id")
         with self.conn:
             cur = self.conn.execute(
                 "DELETE FROM components WHERE id = ?",

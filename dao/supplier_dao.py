@@ -28,21 +28,35 @@ class SupplierDAO:
             )
         return cur.lastrowid
 
-    def update(self, supplier: dict) -> bool:
-        """Update supplier by ID using dict fields."""
+    def update(self, supplier: int | dict, values: dict | None = None) -> bool:
+        """Update supplier by ID using dict fields.
+
+        Accepts either a supplier ``dict`` containing the ``id`` or a supplier
+        ``id`` with a ``values`` dictionary of updated fields.
+        """
+        if isinstance(supplier, int):
+            supplier_id = supplier
+            if values is None:
+                raise ValueError("values must be provided when updating by id")
+            data = values
+        else:
+            data = supplier
+            supplier_id = data.get("id")
+
         with self.conn:
             cur = self.conn.execute(
                 "UPDATE suppliers SET name = ?, contact_info = ? WHERE id = ?",
                 (
-                    supplier.get("name"),
-                    supplier.get("contact_info"),
-                    supplier.get("id"),
+                    data.get("name"),
+                    data.get("contact_info"),
+                    supplier_id,
                 ),
             )
         return cur.rowcount > 0
 
-    def delete(self, supplier_id: int) -> bool:
-        """Delete supplier by ID."""
+    def delete(self, supplier: int | dict) -> bool:
+        """Delete supplier by ID or supplier dict."""
+        supplier_id = supplier if isinstance(supplier, int) else supplier.get("id")
         with self.conn:
             cur = self.conn.execute(
                 "DELETE FROM suppliers WHERE id = ?",
