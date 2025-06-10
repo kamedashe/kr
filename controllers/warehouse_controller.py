@@ -10,10 +10,13 @@ class WarehouseController:
 
     def show_stock(self):
         """Load current stock data into the view."""
-        if self.view is not None and self.service is not None:
-            self.view.refresh(self.service.list_all())
+        self.view.refresh(self.service.list_all())
 
     def register_expense(self):
-        """Placeholder for registering component usage."""
-        # Real logic would adjust stock based on user input.
-        self.show_stock()
+        """Register a component usage expense."""
+        dto = {
+            "component_id": self.view.component_id_var.get(),
+            "qty": -abs(self.view.qty_var.get()),
+        }
+        self.service.create(dto)
+        self.view.refresh(self.service.list_all())
