@@ -2,13 +2,17 @@ from db.database import get_connection
 from ui.main_window import MainWindow
 from dao.supplier_dao import SupplierDAO
 from services.supplier_service import SupplierService
-from controllers.supplier_controller import SupplierController
+from controllers.suppliers_controller import SuppliersController
 from dao.history_dao import HistoryDAO
 from services.history_service import HistoryService
 from services.report_service import ReportService
-from controllers.report_controller import ReportController
-from services.component_service import ComponentService
-from dao.component_dao import ComponentDAO
+from controllers.reports_controller import ReportsController
+from services.warehouse_service import WarehouseService
+from dao.warehouse_dao import WarehouseDAO
+from services.order_service import OrderService
+from services.contract_service import ContractService
+from dao.order_dao import OrderDAO
+from dao.contract_dao import ContractDAO
 from controllers.warehouse_controller import WarehouseController
 from controllers.orders_controller import OrdersController
 
@@ -17,18 +21,32 @@ def main():
     app = MainWindow()
     conn = get_connection()
 
-    supplier_dao = SupplierDAO(conn)
-    supplier_service = SupplierService(supplier_dao)
-    SupplierController(view=app.suppliers_tab, service=supplier_service)
+    reports_tab = app.reports_tab
+    suppliers_tab = app.suppliers_tab
+    orders_tab = app.orders_tab
+    warehouse_tab = app.warehouse_tab
 
-    OrdersController(view=app.orders_tab)
+    reports_ctrl = ReportsController(
+        view=reports_tab,
+        report_service=ReportService(),
+        history_service=HistoryService(HistoryDAO(conn)),
+    )
 
-    component_service = ComponentService(ComponentDAO(conn))
-    WarehouseController(view=app.warehouse_tab, service=component_service)
+    suppliers_ctrl = SuppliersController(
+        view=suppliers_tab,
+        service=SupplierService(SupplierDAO(conn)),
+    )
 
-    report_service = ReportService()
-    history_service = HistoryService(HistoryDAO(conn))
-    ReportController(app.reports_tab, report_service, history_service)
+    warehouse_ctrl = WarehouseController(
+        warehouse_tab,
+        WarehouseService(WarehouseDAO(conn)),
+    )
+
+    orders_ctrl = OrdersController(
+        orders_tab,
+        OrderService(OrderDAO(conn)),
+        ContractService(ContractDAO(conn)),
+    )
 
     app.mainloop()
 
