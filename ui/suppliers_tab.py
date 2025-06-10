@@ -42,5 +42,13 @@ class SuppliersTab(ttk.Frame):
         for row in self.table.get_children():
             self.table.delete(row)
         for supplier in suppliers:
-            self.table.insert("", "end", iid=supplier["id"], values=(supplier["name"], supplier["contact_info"]))
+            # Skip blank records added accidentally
+            if supplier.get("name", "") == "":
+                continue
+            self.table.insert(
+                "",
+                "end",
+                iid=supplier["id"],
+                values=(supplier["name"], supplier["contact_info"]),
+            )
 
