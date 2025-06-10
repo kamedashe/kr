@@ -1,3 +1,6 @@
+from tkinter import messagebox
+
+
 class SupplierController:
     """Controller for supplier interactions."""
 
@@ -15,6 +18,13 @@ class SupplierController:
 
     def on_create(self):
         dto = self._dto_from_view()
+        if not dto["name"].strip():
+            messagebox.showwarning("Validation", "Name is required")
+            if hasattr(self.view, "highlight_name_field"):
+                self.view.highlight_name_field(True)
+            return
+        if hasattr(self.view, "highlight_name_field"):
+            self.view.highlight_name_field(False)
         self.service.create(dto)
         self.view.refresh(self.service.list_all())
 
@@ -23,6 +33,13 @@ class SupplierController:
         if not selected:
             return
         dto = self._dto_from_view()
+        if not dto["name"].strip():
+            messagebox.showwarning("Validation", "Name is required")
+            if hasattr(self.view, "highlight_name_field"):
+                self.view.highlight_name_field(True)
+            return
+        if hasattr(self.view, "highlight_name_field"):
+            self.view.highlight_name_field(False)
         dto["id"] = int(selected[0])
         self.service.update(dto)
         self.view.refresh(self.service.list_all())
