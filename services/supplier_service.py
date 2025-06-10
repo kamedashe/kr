@@ -18,3 +18,7 @@ class SupplierService:
 
     def list_all(self) -> list[dict]:
         return self.dao.select_all()
+
+    def get(self, supplier_id: int) -> dict | None:
+        """Return supplier by ID."""
+        return self.dao.select_by_id(supplier_id)

@@ -10,6 +10,7 @@ from controllers.report_controller import ReportController
 from services.component_service import ComponentService
 from dao.component_dao import ComponentDAO
 from controllers.warehouse_controller import WarehouseController
+from controllers.orders_controller import OrdersController
 
 
 def main():
@@ -19,6 +20,8 @@ def main():
     supplier_dao = SupplierDAO(conn)
     supplier_service = SupplierService(supplier_dao)
     SupplierController(view=app.suppliers_tab, service=supplier_service)
+
+    OrdersController(view=app.orders_tab)
 
     component_service = ComponentService(ComponentDAO(conn))
     WarehouseController(view=app.warehouse_tab, service=component_service)

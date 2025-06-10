@@ -19,5 +19,9 @@ class ComponentService:
     def list_all(self) -> list[dict]:
         return self.dao.select_all()
 
+    def get(self, component_id: int) -> dict | None:
+        """Return component by ID."""
+        return self.dao.select_by_id(component_id)
+
     def adjust_stock(self, component_id: int, delta: int) -> None:
         self.dao.update_quantity(component_id, delta)

@@ -27,3 +27,8 @@ def test_update(service, sample_supplier):
     assert service.update(dto) is True
     updated = service.list_all()[0]
     assert updated["name"] == "Bolt"
+
+def test_get(service, sample_supplier):
+    row = service.get(sample_supplier["id"])
+    assert row["id"] == sample_supplier["id"]
+    assert row["name"] == sample_supplier["name"]
