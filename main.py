@@ -17,9 +17,15 @@ def main():
     supplier_service = SupplierService(supplier_dao)
     SupplierController(view=app.suppliers_tab, service=supplier_service)
 
+
     history_service = HistoryService(HistoryDAO(conn))
     report_service = ReportService()
     ReportController(app.reports_tab, history_service, report_service)
+
+
+    report_service = ReportService()
+    history_service = HistoryService(HistoryDAO(conn))
+    ReportController(app.reports_tab, report_service, history_service)
 
     app.mainloop()
 
