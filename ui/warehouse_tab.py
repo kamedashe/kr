@@ -1,11 +1,19 @@
 
-from tkinter import ttk
+from tkinter import ttk, IntVar
 
 class WarehouseTab(ttk.Frame):
     """UI for viewing stock levels and registering expenses."""
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.qty_var = IntVar()
+        self.component_id_var = IntVar()
+        form = ttk.Frame(self)
+        form.pack(fill="x", pady=5)
+        ttk.Label(form, text="Component ID:").grid(row=0, column=0, padx=5)
+        ttk.Entry(form, textvariable=self.component_id_var).grid(row=0, column=1, padx=5)
+        ttk.Label(form, text="Qty:").grid(row=0, column=2, padx=5)
+        ttk.Entry(form, textvariable=self.qty_var).grid(row=0, column=3, padx=5)
 
         btn_frame = ttk.Frame(self)
         btn_frame.pack(fill="x", pady=5)
