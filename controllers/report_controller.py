@@ -1,10 +1,17 @@
 class ReportController:
     """Controller for reports and history."""
 
+
+    def __init__(self, view=None, history_service=None, report_service=None):
+        self.view = view
+        self.history_service = history_service
+        self.report_service = report_service
+
     def __init__(self, view=None, report_service=None, history_service=None):
         self.view = view
         self.report_service = report_service
         self.history_service = history_service
+
         if self.view is not None:
             self.view.set_controller(self)
 
