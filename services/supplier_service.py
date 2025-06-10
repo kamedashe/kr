@@ -10,8 +10,8 @@ class SupplierService:
     def create(self, dto: dict) -> int:
         return self.dao.insert(dto)
 
-    def update(self, dto: dict) -> bool:
-        return self.dao.update(dto)
+    def update(self, supplier: dict) -> bool:
+        return self.dao.update(supplier)
 
     def delete(self, supplier_id: int) -> bool:
         return self.dao.delete(supplier_id)
