@@ -7,6 +7,9 @@ from dao.history_dao import HistoryDAO
 from services.history_service import HistoryService
 from services.report_service import ReportService
 from controllers.report_controller import ReportController
+from services.component_service import ComponentService
+from dao.component_dao import ComponentDAO
+from controllers.warehouse_controller import WarehouseController
 
 
 def main():
@@ -17,11 +20,8 @@ def main():
     supplier_service = SupplierService(supplier_dao)
     SupplierController(view=app.suppliers_tab, service=supplier_service)
 
-
-    history_service = HistoryService(HistoryDAO(conn))
-    report_service = ReportService()
-    ReportController(app.reports_tab, history_service, report_service)
-
+    component_service = ComponentService(ComponentDAO(conn))
+    WarehouseController(view=app.warehouse_tab, service=component_service)
 
     report_service = ReportService()
     history_service = HistoryService(HistoryDAO(conn))
