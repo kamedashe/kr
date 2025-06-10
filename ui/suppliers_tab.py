@@ -1,16 +1,22 @@
 from tkinter import ttk, StringVar
 
 
+
+
 class SuppliersTab(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.name_var = StringVar()
         self.contact_var = StringVar()
 
+        self.style = ttk.Style()
+        self.style.configure("Error.TEntry", fieldbackground="#ffecec")
+
         form = ttk.Frame(self)
         form.pack(fill="x", pady=5)
         ttk.Label(form, text="Name:").grid(row=0, column=0, padx=5)
-        ttk.Entry(form, textvariable=self.name_var).grid(row=0, column=1, padx=5)
+        self.name_entry = ttk.Entry(form, textvariable=self.name_var)
+        self.name_entry.grid(row=0, column=1, padx=5)
         ttk.Label(form, text="Contact:").grid(row=0, column=2, padx=5)
         ttk.Entry(form, textvariable=self.contact_var).grid(row=0, column=3, padx=5)
 
@@ -27,6 +33,10 @@ class SuppliersTab(ttk.Frame):
 
     def set_controller(self, ctrl):
         self.ctrl = ctrl
+
+    def highlight_name_field(self, error: bool) -> None:
+        style = "Error.TEntry" if error else "TEntry"
+        self.name_entry.configure(style=style)
 
     def refresh(self, suppliers: list[dict]):
         for row in self.table.get_children():
