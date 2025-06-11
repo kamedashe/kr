@@ -10,6 +10,7 @@ class WarehouseController:
 
     def show_stock(self):
         """Load current stock data into the view."""
+        # Populate the table with all components currently in stock
         self.view.refresh(self.service.list_all())
 
     def register_expense(self):
