@@ -12,6 +12,11 @@ class SuppliersTab(ttk.Frame):
         self.style = ttk.Style()
         self.style.configure("Error.TEntry", fieldbackground="#ffecec")
 
+        self.build_ui()
+        self.populate_suppliers()
+
+    def build_ui(self) -> None:
+        """Create widgets for the suppliers tab."""
         form = ttk.Frame(self)
         form.pack(fill="x", pady=5)
         ttk.Label(form, text="Name:").grid(row=0, column=0, padx=5)
@@ -26,13 +31,19 @@ class SuppliersTab(ttk.Frame):
         ttk.Button(btn_frame, text="Update", command=lambda: self.ctrl.on_update()).pack(side="left", padx=5)
         ttk.Button(btn_frame, text="Delete", command=lambda: self.ctrl.on_delete()).pack(side="left", padx=5)
 
-        self.table = ttk.Treeview(self, columns=("name", "contact"), show="headings")
-        self.table.heading("name", text="Name")
-        self.table.heading("contact", text="Contact info")
-        self.table.pack(fill="both", expand=True, pady=5)
+        # Tree with ID column for compatibility with populate_suppliers
+        self.tree = ttk.Treeview(self, columns=("id", "name", "contact"), show="headings")
+        self.tree.heading("id", text="ID")
+        self.tree.heading("name", text="Name")
+        self.tree.heading("contact", text="Contact info")
+        self.tree.pack(fill="both", expand=True, pady=5)
+
+        # Alias for backward compatibility with controllers using 'table'
+        self.table = self.tree
 
     def set_controller(self, ctrl):
         self.ctrl = ctrl
+        self.controller = ctrl
 
     def highlight_name_field(self, error: bool) -> None:
         style = "Error.TEntry" if error else "TEntry"
@@ -50,5 +61,24 @@ class SuppliersTab(ttk.Frame):
                 "end",
                 iid=supplier["id"],
                 values=(supplier["name"], supplier["contact_info"]),
+            )
+
+    def populate_suppliers(self) -> None:
+        """Populate the tree with suppliers from the controller."""
+        if not hasattr(self, "tree"):
+            return
+        for row in self.tree.get_children():
+            self.tree.delete(row)
+
+        controller = getattr(self, "controller", None)
+        if controller is None:
+            return
+
+        for supplier in controller.list_all_suppliers():
+            self.tree.insert(
+                "",
+                "end",
+                iid=supplier[0],
+                values=(supplier[0], supplier[1], supplier[2]),
             )
 
