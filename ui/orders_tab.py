@@ -23,10 +23,14 @@ class OrdersTab(ttk.Frame):
             command=self._on_check_contract,
         ).pack(side="left", padx=5)
 
-        self.table = ttk.Treeview(self, columns=("id", "details"), show="headings")
-        self.table.heading("id", text="ID")
-        self.table.heading("details", text="Details")
+        columns = ("id", "supplier", "component", "qty", "date")
+        self.table = ttk.Treeview(self, columns=columns, show="headings")
+        for col in columns:
+            self.table.heading(col, text=col)
+            self.table.column(col, anchor="center")
         self.table.pack(fill="both", expand=True)
+
+        self.populate_orders()
 
     def set_controller(self, ctrl):
         self.ctrl = ctrl
@@ -37,18 +41,29 @@ class OrdersTab(ttk.Frame):
         for row in self.table.get_children():
             self.table.delete(row)
         for order in orders:
-            self.table.insert("", "end", iid=order["id"], values=(order["id"], order.get("details", "")))
+            self.table.insert(
+                "",
+                "end",
+                iid=order[0],
+                values=(order[0], order[1], order[2], order[3], order[4]),
+            )
 
     def populate_orders(self) -> None:
         """Populate the orders table using the attached controller."""
         controller = getattr(self, "controller", None)
         if controller is None:
             return
-        for row in self.table.get_children():
-            self.table.delete(row)
-        for order in controller.list_all_orders():
-            details = f"{order['component_id']} x {order['qty']} from {order['supplier_id']}"
-            self.table.insert("", "end", iid=order["id"], values=(order["id"], details))
+
+        for row_id in self.table.get_children():
+            self.table.delete(row_id)
+
+        for row in controller.list_all_orders():
+            self.table.insert(
+                "",
+                "end",
+                iid=row[0],
+                values=(row[0], row[1], row[2], row[3], row[4]),
+            )
 
     def _on_check_contract(self) -> None:
         """Trigger contract check for the selected order."""
