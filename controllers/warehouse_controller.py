@@ -20,9 +20,25 @@ class WarehouseController:
 
     def register_expense(self):
         """Register a component usage expense."""
-        dto = {
-            "component_id": self.view.component_id_var.get(),
-            "qty": -abs(self.view.qty_var.get()),
-        }
-        self.service.create(dto)
-        self.view.refresh(self.service.list_all())
+        from tkinter import messagebox
+
+        try:
+            component_id = int(self.view.component_id_var.get())
+            qty = int(self.view.qty_var.get())
+        except Exception:
+            messagebox.showerror("Error", "Invalid input")
+            return
+
+        if qty <= 0:
+            messagebox.showerror("Error", "Quantity must be greater than 0")
+            return
+
+        if hasattr(self, "facade"):
+            try:
+                self.facade.warehouse_dao.register_expense(component_id, qty)
+            except ValueError as exc:
+                messagebox.showerror("Error", str(exc))
+                return
+
+        self.show_stock()
+        messagebox.showinfo("Success", "Expense registered")
