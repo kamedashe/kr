@@ -13,12 +13,19 @@ class WarehouseController:
 
     def show_stock(self):
         """Load current stock data into the view."""
-        self.view.refresh(self.service.list_all())
+        rows = self.service.list_all()
+        self.view.refresh(rows)
+        if not rows:
+            messagebox.showinfo("Stock", "No components in stock")
 
     def register_expense(self):
         """Register a component usage expense."""
-        component_id = self.view.component_id_var.get()
-        qty = self.view.qty_var.get()
+        try:
+            component_id = int(self.view.component_id_var.get())
+            qty = int(self.view.qty_var.get())
+        except (TypeError, ValueError):
+            messagebox.showwarning("Validation", "Component ID and quantity must be numbers")
+            return
 
         if component_id <= 0 or qty <= 0:
             messagebox.showwarning(
@@ -30,6 +37,6 @@ class WarehouseController:
         self.service.adjust_stock(component_id, -qty)
 
         # Refresh the stock view
-        self.view.refresh(self.service.list_all())
+        self.show_stock()
 
         messagebox.showinfo("Expense", "Expense registered")
