@@ -35,6 +35,9 @@ class WarehouseTab(ttk.Frame):
         self.table.heading("qty", text="Quantity")
         self.table.pack(fill="both", expand=True)
 
+        # Alias used by populate_stock for compatibility with other tabs
+        self.tree = self.table
+
     def set_controller(self, ctrl):
         self.ctrl = ctrl
 
@@ -48,3 +51,17 @@ class WarehouseTab(ttk.Frame):
                 iid=item["id"],
                 values=(item["name"], item.get("quantity_in_stock", 0)),
             )
+
+    def populate_stock(self, rows):
+        """Populate stock table from list of tuples."""
+        from tkinter import messagebox
+
+        for row_id in self.tree.get_children():
+            self.tree.delete(row_id)
+
+        if not rows:
+            messagebox.showinfo("Info", "Stock is empty")
+            return
+
+        for rec in rows:
+            self.tree.insert("", "end", iid=rec[0], values=(rec[1], rec[2]))
