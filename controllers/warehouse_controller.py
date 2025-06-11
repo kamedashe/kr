@@ -17,6 +17,9 @@ class WarehouseController:
             except Exception:
                 rows = []
         self.view.populate_stock(rows)
+        # Populate the table with all components currently in stock
+        self.view.refresh(self.service.list_all())
+
 
     def register_expense(self):
         """Register a component usage expense."""
