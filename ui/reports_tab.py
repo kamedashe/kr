@@ -38,6 +38,7 @@ class ReportsTab(ttk.Frame):
         self.ctrl = ctrl
 
     def refresh(self, rows: list[dict]):
+        rows = rows or []
         for row in self.table.get_children():
             self.table.delete(row)
         for r in rows:
@@ -45,5 +46,11 @@ class ReportsTab(ttk.Frame):
                 "",
                 "end",
                 iid=r.get("id"),
-                values=(r.get("id"), r.get("supplier"), r.get("component"), r.get("qty"), r.get("date")),
+                values=(
+                    r.get("id"),
+                    r.get("supplier"),
+                    r.get("component"),
+                    r.get("qty"),
+                    r.get("date"),
+                ),
             )
