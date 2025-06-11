@@ -1,30 +1,27 @@
+from tkinter import messagebox
+
 
 class WarehouseController:
-    """Controller for warehouse-related actions."""
+    """Controller providing stock information and expense registration."""
 
-    def __init__(self, view=None, service=None):
+    def __init__(self, view=None):
         self.view = view
-        self.service = service
         if self.view is not None:
             self.view.set_controller(self)
 
-    def show_stock(self):
-        """Load current stock data into the view."""
+    def show_stock(self) -> None:
+        """Populate the stock table in the attached view."""
         rows = []
         if hasattr(self, "facade"):
             try:
                 rows = self.facade.warehouse_dao.get_all_stock()
             except Exception:
                 rows = []
-        self.view.populate_stock(rows)
-        # Populate the table with all components currently in stock
-        self.view.refresh(self.service.list_all())
+        if self.view:
+            self.view.populate_stock(rows)
 
-
-    def register_expense(self):
-        """Register a component usage expense."""
-        from tkinter import messagebox
-
+    def register_expense(self) -> None:
+        """Validate fields and register component expense."""
         try:
             component_id = int(self.view.component_id_var.get())
             qty = int(self.view.qty_var.get())
