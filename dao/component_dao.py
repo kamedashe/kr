@@ -125,3 +125,7 @@ class ComponentDAO:
                 "UPDATE components SET quantity_in_stock = quantity_in_stock + ? WHERE id = ?",
                 (delta, component_id),
             )
+
+    def get_all(self):
+        """Alias for ``select_all``."""
+        return self.select_all()

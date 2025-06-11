@@ -1,12 +1,16 @@
+import sqlite3
+from typing import Any, Dict, List, Tuple
+
+
 class OrderDAO:
-    """SQLite DAO for purchase orders."""
+    """DAO for purchase orders."""
 
-    def __init__(self, conn):
+    def __init__(self, conn: sqlite3.Connection) -> None:
         self.conn = conn
-        self._create_table()
+        self._ensure_table()
 
-    def _create_table(self) -> None:
-        """Create table for orders if it doesn't exist."""
+    def _ensure_table(self) -> None:
+        """Create orders table if missing."""
         self.conn.execute(
             """
             CREATE TABLE IF NOT EXISTS orders (
@@ -14,6 +18,7 @@ class OrderDAO:
                 supplier_id INTEGER NOT NULL,
                 component_id INTEGER NOT NULL,
                 qty INTEGER NOT NULL,
+                date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
                 FOREIGN KEY (component_id) REFERENCES components(id)
             )
@@ -21,41 +26,44 @@ class OrderDAO:
         )
         self.conn.commit()
 
-    def insert(self, order: dict) -> int:
-        """Insert order and return new ID."""
+    def insert(self, supplier_id: int, component_id: int, qty: int) -> int:
+        """Insert an order and update stock/history."""
         with self.conn:
             cur = self.conn.execute(
                 "INSERT INTO orders (supplier_id, component_id, qty) VALUES (?, ?, ?)",
-                (
-                    order.get("supplier_id"),
-                    order.get("component_id"),
-                    order.get("qty"),
-                ),
+                (supplier_id, component_id, qty),
+            )
+            self.conn.execute(
+                "UPDATE components SET quantity_in_stock = quantity_in_stock + ? WHERE id = ?",
+                (qty, component_id),
+            )
+            self.conn.execute(
+                "INSERT INTO supply_history (supplier_id, component_id, qty, date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)",
+                (supplier_id, component_id, qty),
             )
         return cur.lastrowid
 
-    def select_all(self) -> list[dict]:
-        """Return all orders ordered by id."""
-        cur = self.conn.execute(
-            "SELECT id, supplier_id, component_id, qty FROM orders ORDER BY id"
-        )
-        return [
-            {
-                "id": r[0],
-                "supplier_id": r[1],
-                "component_id": r[2],
-                "qty": r[3],
-            }
-            for r in cur.fetchall()
-        ]
-
-    def get(self, order_id: int):
-        """Return single order joined with names for display."""
+    def list_all(self) -> List[Tuple[int, str, str, int, str]]:
+        """Return all orders with human readable fields."""
         cur = self.conn.execute(
             """
-            SELECT o.id,
-                   s.name AS supplier,
-                   c.name || ' x ' || o.qty AS details
+            SELECT o.id, s.name, c.name, o.qty, o.date
+              FROM orders o
+              JOIN suppliers s ON o.supplier_id = s.id
+              JOIN components c ON o.component_id = c.id
+             ORDER BY o.id
+            """
+        )
+        return [
+            (row[0], row[1], row[2], row[3], row[4])
+            for row in cur.fetchall()
+        ]
+
+    def get(self, order_id: int) -> Dict[str, Any] | None:
+        """Return single order row with supplier and component names."""
+        cur = self.conn.execute(
+            """
+            SELECT o.id, s.name, c.name, o.qty, o.date
               FROM orders o
               JOIN suppliers s ON o.supplier_id = s.id
               JOIN components c ON o.component_id = c.id
@@ -69,5 +77,6 @@ class OrderDAO:
         return {
             "id": row[0],
             "supplier": row[1],
-            "details": row[2],
+            "details": f"{row[2]} x {row[3]}",
+            "date": row[4],
         }

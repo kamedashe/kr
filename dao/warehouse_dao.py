@@ -1,15 +1,17 @@
+import sqlite3
+from typing import List, Tuple
 from dao.component_dao import ComponentDAO
 
 
 class WarehouseDAO(ComponentDAO):
-    """Alias DAO for warehouse operations using components table."""
+    """DAO providing warehouse specific operations."""
 
-    def __init__(self, conn):
+    def __init__(self, conn: sqlite3.Connection) -> None:
         super().__init__(conn)
         self._ensure_history_table()
 
     def _ensure_history_table(self) -> None:
-        """Create the ``supply_history`` table if needed."""
+        """Create ``supply_history`` table if missing."""
         self.conn.execute(
             """
             CREATE TABLE IF NOT EXISTS supply_history (
@@ -25,36 +27,31 @@ class WarehouseDAO(ComponentDAO):
         )
         self.conn.commit()
 
-    def get_all_stock(self) -> list[tuple[int, str, int]]:
-        """Return all component stock as tuples ordered by ``id``."""
+    def get_all_stock(self) -> List[Tuple[int, str, int]]:
+        """Return list of component id, name and quantity."""
         cur = self.conn.execute(
-            "SELECT c.id, c.name, c.quantity_in_stock FROM components c ORDER BY c.id"
+            "SELECT id, name, quantity_in_stock FROM components ORDER BY id"
         )
         return [(row[0], row[1], row[2]) for row in cur.fetchall()]
 
     def register_expense(self, component_id: int, qty: int) -> None:
-        """Decrease stock for the given component by ``qty``.
-
-        Raises ``ValueError`` if the component does not exist or there is
-        insufficient stock available.
-        """
+        """Write component usage to history and decrease stock."""
         cur = self.conn.execute(
-            "SELECT quantity_in_stock FROM components WHERE id=?",
+            "SELECT quantity_in_stock FROM components WHERE id = ?",
             (component_id,),
         )
         row = cur.fetchone()
         if row is None:
             raise ValueError("Component not found")
-        stock = row[0]
-        if qty > stock:
+        if qty > row[0]:
             raise ValueError("Insufficient stock")
 
         with self.conn:
             self.conn.execute(
-                "UPDATE components SET quantity_in_stock = quantity_in_stock - ? WHERE id=?",
+                "UPDATE components SET quantity_in_stock = quantity_in_stock - ? WHERE id = ?",
                 (qty, component_id),
             )
             self.conn.execute(
-                "INSERT INTO supply_history(supplier_id, component_id, qty, date) VALUES (NULL, ?, ?, CURRENT_TIMESTAMP)",
+                "INSERT INTO supply_history (supplier_id, component_id, qty, date) VALUES (NULL, ?, ?, CURRENT_TIMESTAMP)",
                 (component_id, -qty),
             )
