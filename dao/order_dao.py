@@ -63,4 +63,11 @@ class OrderDAO:
             """,
             (order_id,),
         )
-        return cur.fetchone()
+        row = cur.fetchone()
+        if row is None:
+            return None
+        return {
+            "id": row[0],
+            "supplier": row[1],
+            "details": row[2],
+        }
