@@ -10,7 +10,8 @@ class WarehouseController:
 
     def show_stock(self):
         """Load current stock data into the view."""
-        self.view.refresh(self.service.list_all())
+        rows = self.facade.warehouse_dao.get_all_stock()
+        self.view.populate_stock(rows)
 
     def register_expense(self):
         """Register a component usage expense."""
