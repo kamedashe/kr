@@ -1,4 +1,7 @@
 
+from tkinter import messagebox
+
+
 class WarehouseController:
     """Controller for warehouse-related actions."""
 
@@ -14,9 +17,19 @@ class WarehouseController:
 
     def register_expense(self):
         """Register a component usage expense."""
-        dto = {
-            "component_id": self.view.component_id_var.get(),
-            "qty": -abs(self.view.qty_var.get()),
-        }
-        self.service.create(dto)
+        component_id = self.view.component_id_var.get()
+        qty = self.view.qty_var.get()
+
+        if component_id <= 0 or qty <= 0:
+            messagebox.showwarning(
+                "Validation", "Component ID and quantity must be positive"
+            )
+            return
+
+        # Adjust stock by negative quantity to represent an expense
+        self.service.adjust_stock(component_id, -qty)
+
+        # Refresh the stock view
         self.view.refresh(self.service.list_all())
+
+        messagebox.showinfo("Expense", "Expense registered")
