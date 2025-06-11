@@ -95,16 +95,58 @@ class OrdersController:
 
         ttk.Button(modal, text="OK", command=on_ok).grid(row=3, column=0, columnspan=2, pady=10)
 
-    def check_contract(self):
-        """Placeholder for contract checking logic."""
-        if self.contract_service is not None:
-            try:
-                contracts = self.contract_service.list_all()
-            except Exception:
-                contracts = []
-        else:
-            contracts = []
+        def on_ok():
+            qty = qty_var.get()
+            if qty <= 0:
+                messagebox.showwarning("Validation", "Quantity must be greater than 0")
+                return
 
-        if self.view is not None:
-            self.view.refresh(contracts)
+            indices = comp_list.curselection()
+            if not indices:
+                messagebox.showwarning("Validation", "Select at least one component")
+                return
+
+            if supplier_cb.current() == -1:
+                messagebox.showwarning("Validation", "Select supplier")
+                return
+
+            # Simplified: use only the first selected component
+            component_id = components[indices[0]]["id"]
+            supplier_id = suppliers[supplier_cb.current()]["id"]
+
+            if hasattr(self, "facade"):
+                self.facade.order_dao.insert(
+                    {
+                        "supplier_id": supplier_id,
+                        "component_id": component_id,
+                        "qty": qty,
+                    }
+                )
+
+            modal.destroy()
+            if hasattr(self.view, "populate_orders"):
+                self.view.populate_orders()
+            messagebox.showinfo("Order", "Order created")
+
+        ttk.Button(modal, text="OK", command=on_ok).grid(row=3, column=0, columnspan=2, pady=10)
+
+    def check_contract(self, order_id: int) -> None:
+        """Display contract details for the given order."""
+        from tkinter import messagebox
+
+        row = None
+        if hasattr(self, "facade"):
+            try:
+                row = self.facade.order_dao.get(order_id)
+            except Exception:
+                row = None
+
+        if row is None:
+            messagebox.showinfo("Contract", "Order not found")
+            return
+
+        messagebox.showinfo(
+            "Contract",
+            f"Order #{row['id']}\nSupplier: {row['supplier']}\nDetails: {row['details']}",
+        )
 

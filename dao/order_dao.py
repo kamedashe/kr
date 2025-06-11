@@ -48,3 +48,19 @@ class OrderDAO:
             }
             for r in cur.fetchall()
         ]
+
+    def get(self, order_id: int):
+        """Return single order joined with names for display."""
+        cur = self.conn.execute(
+            """
+            SELECT o.id,
+                   s.name AS supplier,
+                   c.name || ' x ' || o.qty AS details
+              FROM orders o
+              JOIN suppliers s ON o.supplier_id = s.id
+              JOIN components c ON o.component_id = c.id
+             WHERE o.id = ?
+            """,
+            (order_id,),
+        )
+        return cur.fetchone()
